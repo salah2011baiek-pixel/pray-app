@@ -1,147 +1,104 @@
 <!DOCTYPE html>
-<html lang="ar">
-<body style="margin:0; overflow:hidden; background:#1a1a2e; font-family:sans-serif; color:white; text-align:center;">
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تطبيق المسلم الشامل</title>
+    <style>
+        :root { --primary: #1a4a4a; --gold: #d4af37; --bg: #fdfaf6; }
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #fdfaf6; margin: 0; padding: 20px; background-image: url('https://www.transparenttextures.com/patterns/arabesque.png'); }
+        .app-container { max-width: 450px; margin: auto; background: white; border-radius: 30px; padding: 25px; box-shadow: 0 15px 35px rgba(0,0,0,0.15); border: 2px solid var(--gold); }
+        .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--gold); padding-bottom: 15px; }
+        h2 { color: var(--primary); margin: 0; }
+        .quote { text-align: center; font-size: 1.2em; color: var(--gold); margin: 20px 0; font-weight: bold; font-style: italic; }
+        .section { margin-top: 20px; padding: 15px; border-radius: 20px; background: #fdfaf6; border: 1px solid #eee; }
+        .prayer-time { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px dashed #ccc; font-weight: 500; }
+        .bell { cursor: pointer; color: var(--primary); font-size: 22px; transition: 0.3s; }
+        select { padding: 5px; border-radius: 8px; border: 1px solid var(--gold); margin-bottom: 10px; }
+        #dhikrList { max-height: 200px; overflow-y: auto; padding: 10px; font-size: 0.9em; line-height: 1.8; }
+        .dhikr-item { padding: 6px 0; border-bottom: 1px solid #eee; }
+    </style>
+</head>
+<body>
 
-<button onclick="openSettings()" style="position:absolute; top:10px; right:10px; z-index:50; background:transparent; border:none; color:white; font-size:2em; cursor:pointer;">⚙️</button>
-
-<div id="menu" style="position:absolute; width:100%; height:100%; background:#0f3460; display:flex; flex-direction:column; justify-content:center; align-items:center; z-index:20;">
-    <h1 id="tTitle" style="font-size: 2.2em; margin-bottom: 15px;">تحدي الـ 100 نقطة</h1>
-    <p id="tShape">اختر الشكل:</p>
-    <div id="shapeBtns" style="display:flex; gap:15px; margin-bottom:20px;">
-        <button onclick="selectShape(this, '⚽')" style="font-size: 1.8em; background-color:#2ecc71; border:none; border-radius:5px; cursor:pointer;">⚽</button>
-        <button onclick="selectShape(this, '🏀')" style="font-size: 1.8em; border:none; border-radius:5px; cursor:pointer;">🏀</button>
-        <button onclick="selectShape(this, '🏐')" style="font-size: 1.8em; border:none; border-radius:5px; cursor:pointer;">🏐</button>
-    </div>
-    <p id="tDiff">اختر الصعوبة:</p>
-    <div id="diffBtns" style="display:flex; gap:15px; margin-bottom:30px;">
-        <button onclick="setDiff(this, 12, 'سهل')" style="font-size: 1em; padding: 10px 20px; border:none; border-radius:5px; cursor:pointer;">سهل</button>
-        <button onclick="setDiff(this, 16, 'متوسط')" style="font-size: 1em; padding: 10px 20px; background-color:#2ecc71; border:none; border-radius:5px; cursor:pointer;">متوسط</button>
-        <button onclick="setDiff(this, 20, 'صعب')" style="font-size: 1em; padding: 10px 20px; border:none; border-radius:5px; cursor:pointer;">صعب</button>
-    </div>
-    <button id="tStart" onclick="start()" style="padding: 12px 40px; font-size: 1.4em; border-radius: 25px; cursor:pointer;">ابدأ التحدي</button>
-</div>
-
-<div id="settingsMenu" style="position:absolute; width:100%; height:100%; background:#1a1a2e; display:none; flex-direction:column; justify-content:center; align-items:center; z-index:40;">
-    <h2 id="tSet">الإعدادات</h2>
-    <div style="margin: 20px;">
-        <label id="tLangLabel">اللغة: </label>
-        <select id="langSelect" onchange="changeLang()">
+<div class="app-container">
+    <div class="header">
+        <h2 id="title">المسلم الشامل</h2>
+        <select id="langSelect" onchange="changeLanguage()">
             <option value="ar">العربية</option>
             <option value="en">English</option>
+            <option value="tr">Türkçe</option>
+            <option value="hi">हिन्दी</option>
         </select>
     </div>
-    <div style="margin: 20px;">
-        <label id="tSizeLabel">حجم الخط: </label>
-        <input type="range" id="sizeRange" min="20" max="60" value="30" oninput="changeFontSize(this.value)">
+
+    <!-- اختيار الدولة -->
+    <select id="countrySelect" onchange="getPrayers()">
+        <option value="UAE|Ajman">عجمان - الإمارات</option>
+        <option value="Saudi Arabia|Riyadh">الرياض - السعودية</option>
+        <option value="Syria|Damascus">دمشق - سوريا</option>
+        <option value="Turkey|Istanbul">إسطنبول - تركيا</option>
+    </select>
+
+    <div class="quote" id="nabiQuote">"لا تنسَ الصلاة على النبي ﷺ"</div>
+
+    <div class="section">
+        <h3 id="prayerTitle">مواقيت الصلاة</h3>
+        <div id="prayerList"></div>
     </div>
-    <button id="tSave" onclick="closeSettings()" style="padding:10px 30px; cursor:pointer;">حفظ والعودة</button>
-</div>
 
-<div id="gameOverMenu" style="position:absolute; width:100%; height:100%; background:rgba(0,0,0,0.85); display:none; flex-direction:column; justify-content:center; align-items:center; z-index:30;">
-    <h1 id="resultText" style="font-size: 2.5em; margin-bottom: 30px;">خسرت!</h1>
-    <button id="tRestart" onclick="restart()" style="padding: 15px 40px; font-size: 1.2em; cursor:pointer;">إعادة اللعب</button>
-    <button id="tBack" onclick="backToMenu()" style="padding: 15px 40px; font-size: 1.2em; background:#e74c3c; border:none; color:white; border-radius:5px; margin-top:10px; cursor:pointer;">العودة للشاشة الرئيسية</button>
+    <div class="section">
+        <h3 id="dhikrTitle">أذكار اليوم</h3>
+        <div id="dhikrList"></div>
+    </div>
 </div>
-
-<canvas id="c"></canvas>
 
 <script>
-    const canvas = document.getElementById("c");
-    const ctx = canvas.getContext("2d");
-    canvas.width = window.innerWidth; canvas.height = window.innerHeight;
-
-    let pY = canvas.height - 120, vY = 0, isJumping = false, fontSize = 30;
-    let obsX = 9999, obsW = 45, obsH = 70, baseSpeed = 20, speed = 20, score = 0, lastScore = 0, bestScore = localStorage.getItem('best') || 0;
-    let gameRunning = false, shape = '⚽', lang = 'ar', diffName = 'متوسط', bonusText = "";
-    let countdown = 10, showTimer = false;
-
-    const trans = {
-        ar: { title: "تحدي الـ 100 نقطة", shape: "اختر الشكل:", diff: "اختر الصعوبة:", start: "ابدأ التحدي", set: "الإعدادات", lang: "اللغة: ", size: "حجم الخط: ", save: "حفظ والعودة", restart: "إعادة اللعب", back: "العودة للشاشة الرئيسية", score: "النقاط: ", best: "أعلى: ", last: "آخر: ", diffLabel: "الصعوبة: ", lose: "خسرت! النتيجة: ", ready: "استعد: " },
-        en: { title: "100 Points Challenge", shape: "Select Shape:", diff: "Select Difficulty:", start: "Start Challenge", set: "Settings", lang: "Language: ", size: "Font Size: ", save: "Save & Return", restart: "Restart", back: "Back to Menu", score: "Score: ", best: "Best: ", last: "Last: ", diffLabel: "Diff: ", lose: "Game Over! Score: ", ready: "Ready: " }
+    const translations = {
+        ar: { title: "المسلم الشامل", prayer: "مواقيت الصلاة", dhikr: "أذكار اليوم", quote: "لا تنسَ الصلاة على النبي ﷺ" },
+        en: { title: "Muslim App", prayer: "Prayer Times", dhikr: "Daily Athkar", quote: "Don't forget to pray upon the Prophet ﷺ" },
+        tr: { title: "Müslüman Uygulaması", prayer: "Namaz Vakitleri", dhikr: "Günlük Zikirler", quote: "Peygamber'e salavat getirmeyi unutma ﷺ" },
+        hi: { title: "मुस्लिम ऐप", prayer: "नमाज़ का समय", dhikr: "दैनिक अज़कार", quote: "पैगंबर पर सलाम भेजना न भूलें ﷺ" }
     };
 
-    function openSettings() { document.getElementById("settingsMenu").style.display = "flex"; }
-    function closeSettings() { document.getElementById("settingsMenu").style.display = "none"; }
-    function changeFontSize(val) { fontSize = parseInt(val); }
-    function changeLang() { 
-        lang = document.getElementById('langSelect').value;
-        document.getElementById('tTitle').innerText = trans[lang].title;
-        document.getElementById('tShape').innerText = trans[lang].shape;
-        document.getElementById('tDiff').innerText = trans[lang].diff;
-        document.getElementById('tStart').innerText = trans[lang].start;
-        document.getElementById('tSet').innerText = trans[lang].set;
-        document.getElementById('tLangLabel').innerText = trans[lang].lang;
-        document.getElementById('tSizeLabel').innerText = trans[lang].size;
-        document.getElementById('tSave').innerText = trans[lang].save;
-        document.getElementById('tRestart').innerText = trans[lang].restart;
-        document.getElementById('tBack').innerText = trans[lang].back;
+    const dhikrs = ["سبحان الله", "الحمد لله", "لا إله إلا الله", "الله أكبر", "أستغفر الله", "لاحول ولا قوة إلا بالله", "سبحان الله وبحمده", "سبحان الله العظيم", "اللهم صلِ على محمد", "يا حي يا قيوم", "أعوذ بكلمات الله التامات", "بسم الله الذي لا يضر", "رضيت بالله ربا", "حسبي الله لا إله إلا هو", "اللهم إني أسألك علما نافعا", "يا مقلب القلوب ثبت قلبي", "اللهم اغفر لي وارحمني", "أستغفر الله العظيم", "لا إله إلا أنت سبحانك", "اللهم إني أعوذ بك من الهم", "يا رحمن يا رحيم", "لا إله إلا الله وحده", "اللهم أعني على ذكرك", "سبحانك اللهم وبحمدك", "استغفر الله الحي القيوم", "يا ذا الجلال والإكرام", "اللهم إني ظلمت نفسي", "سبحان الله عدد خلقه", "الحمد لله ملء ميزانه", "الله أكبر كبيرا", "لاحول ولا قوة إلا بالله العلي العظيم", "اللهم اجعلني من التوابين", "رب اغفر لي ولوالدي", "يا غفور يا ودود", "اللهم ارزقني الجنة", "لا إله إلا الله الملك الحق", "اللهم افتح لي أبواب رحمتك", "سبحان الله والحمد لله", "أستغفر الله عدد خلقه", "يا فتاح يا عليم", "اللهم بارك لي", "ربي اشرح لي صدري", "اللهم أنت ربي", "سبحان الله وبحمده عدد خلقه", "الحمد لله كما ينبغي", "اللهم إني أعوذ بك من عذاب القبر", "يا رب العالمين", "لا إله إلا الله الملك", "اللهم صل وسلم", "سبحان الله العظيم", "أستغفر الله", "ربي زدني علما", "اللهم اجعل القرآن ربيع قلبي", "يا سميع يا بصير", "اللهم آتنا في الدنيا حسنة", "ربنا لا تزغ قلوبنا", "اللهم إني أسألك الهدى", "سبحانك يا رب", "الحمد لله حمدا كثيرا", "لا إله إلا الله مخلصين", "اللهم ثبت أقدامنا", "يا قوي يا متين", "اللهم إني أعوذ بك من زوال نعمتك", "سبحان الله وبحمده عدد كلماته", "الحمد لله على كل حال", "استغفر الله من كل ذنب", "ربي ارحمهما", "اللهم ارزقني حبك", "يا رزاق يا كريم", "لا إله إلا أنت", "اللهم إني أسألك الجنة", "أعوذ بالله من الشيطان", "يا بديع السماوات", "اللهم صل على محمد", "الحمد لله رب العالمين", "الله أكبر كبيرا", "سبحان الله بكرة وأصيلا", "اللهم إني أعوذ بك من فتنة المحيا", "يا لطيف يا خبير", "اللهم طهر قلبي", "ربنا آتنا من لدنك رحمة", "لا إله إلا الله عدد ما كان", "استغفر الله الذي لا إله إلا هو", "يا غني يا مغني", "اللهم إني أسألك العفو والعافية", "سبحان الله وبحمده رضا نفسه", "الحمد لله الذي بنعمته تتم الصالحات", "اللهم احفظني", "يا هادي يا مهدي", "لا إله إلا الله عدد الحركات", "اللهم صل على نبينا محمد", "سبحان الله والحمد لله", "أستغفر الله وأتوب", "يا واسع المغفرة", "اللهم إني أعوذ بك من النار", "ربي أعوذ بك من همزات الشياطين", "سبحان الله العظيم عدد خلقه", "الحمد لله عدد خلقه", "استغفر الله عدد ذنوبي", "اللهم نور قلبي", "يا نور السماوات والأرض"];
+
+    function playAdhan() { new Audio('https://files.muhammedlhdan.com/adhan/makkah_adhan.mp3').play(); }
+
+    function changeLanguage() {
+        const lang = document.getElementById('langSelect').value;
+        document.documentElement.dir = (lang === 'ar' || lang === 'hi') ? 'rtl' : 'ltr';
+        document.getElementById('title').innerText = translations[lang].title;
+        document.getElementById('prayerTitle').innerText = translations[lang].prayer;
+        document.getElementById('dhikrTitle').innerText = translations[lang].dhikr;
+        document.getElementById('nabiQuote').innerText = translations[lang].quote;
     }
 
-    function selectShape(btn, s) { shape = s; Array.from(document.getElementById('shapeBtns').children).forEach(b => b.style.backgroundColor = ""); btn.style.backgroundColor = "#2ecc71"; }
-    function setDiff(btn, s, n) { baseSpeed = s; speed = s; diffName = n; Array.from(document.getElementById('diffBtns').children).forEach(b => b.style.backgroundColor = ""); btn.style.backgroundColor = "#2ecc71"; }
-    
-    function start() { 
-        document.getElementById("menu").style.display = "none"; 
-        score = 0; speed = baseSpeed; obsX = 9999; gameRunning = true; showTimer = true; countdown = 10;
-        let timerInterval = setInterval(() => {
-            countdown--;
-            if(countdown <= 0) { clearInterval(timerInterval); showTimer = false; obsX = canvas.width; }
-        }, 1000);
-        animate(); 
+    function formatTime12(time24) {
+        let [hours, minutes] = time24.split(':');
+        let modifier = hours >= 12 ? ' PM' : ' AM';
+        hours = hours % 12 || 12;
+        return `${hours}:${minutes}${modifier}`;
     }
-    
-    function backToMenu() { document.getElementById("gameOverMenu").style.display = "none"; document.getElementById("menu").style.display = "flex"; }
-    function restart() { start(); document.getElementById("gameOverMenu").style.display = "none"; }
 
-    function jump() { if (!isJumping && gameRunning && !showTimer) { isJumping = true; vY = -30; } }
-    window.addEventListener("mousedown", jump);
-    window.addEventListener("touchstart", (e) => { e.preventDefault(); jump(); });
-
-    function animate() {
-        if (!gameRunning) return;
-        ctx.fillStyle = "#1a1a2e"; ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-        ctx.font = "50px Arial"; ctx.fillText(shape, 80, pY + 45);
+    async function getPrayers() {
+        const val = document.getElementById('countrySelect').value.split('|');
+        const res = await fetch(`https://api.aladhan.com/v1/timingsByCity?city=${val[1]}&country=${val[0]}&method=4`);
+        const data = await res.json();
+        const t = data.data.timings;
+        const list = document.getElementById('prayerList');
+        const prayers = { "Fajr": "الفجر", "Dhuhr": "الظهر", "Asr": "العصر", "Maghrib": "المغرب", "Isha": "العشاء" };
         
-        if (!showTimer) {
-            ctx.fillStyle = "#4ecca3"; ctx.fillRect(obsX, canvas.height - obsH - 20, obsW, obsH);
-            obsX -= speed;
-            if(obsX < -50) { 
-                obsX = canvas.width + Math.random() * 600 + 400; 
-                score++; 
-                speed += 0.5; 
-                if(score % 5 === 0) { bonusText = "+5"; setTimeout(() => bonusText = "", 800); }
-                obsW = 40 + Math.random() * 50; 
-                obsH = 60 + Math.random() * 80;
-            }
-        } else {
-            ctx.fillStyle = "white"; ctx.font = "bold 100px Arial"; ctx.textAlign = "center";
-            ctx.fillText(trans[lang].ready + countdown, canvas.width/2, canvas.height/2);
-            ctx.textAlign = "left";
+        list.innerHTML = "";
+        for (let key in prayers) {
+            list.innerHTML += `<div class="prayer-time"><span>${prayers[key]}</span><span>${formatTime12(t[key])} <span class="bell" onclick="playAdhan()">🔔</span></span></div>`;
         }
-
-        if (obsX < 125 && obsX > 75 && pY > (canvas.height - obsH - 75)) {
-            gameRunning = false; lastScore = score; bestScore = Math.max(bestScore, score); 
-            localStorage.setItem('best', bestScore);
-            document.getElementById("gameOverMenu").style.display = "flex";
-            document.getElementById("resultText").innerText = trans[lang].lose + score;
-        }
-
-        ctx.fillStyle = "white"; ctx.font = "bold " + fontSize + "px Arial";
-        ctx.textAlign = "left";
-        ctx.fillText(trans[lang].score + score, 50, fontSize);
-        ctx.fillText(trans[lang].best + bestScore, 50, fontSize + 40);
-        ctx.fillText(trans[lang].last + lastScore, 50, fontSize + 80);
-        ctx.fillText(trans[lang].diffLabel + diffName, 50, fontSize + 120);
-        
-        if(bonusText) { 
-            ctx.fillStyle = "#f1c40f"; ctx.font = "bold 150px Arial"; ctx.textAlign = "center";
-            ctx.fillText(bonusText, canvas.width/2, canvas.height/2); ctx.textAlign = "left";
-        }
-        
-        if(isJumping) { pY += vY; vY += 1.8; if(pY >= canvas.height - 120) { pY = canvas.height - 120; isJumping = false; vY = 0; } }
-        requestAnimationFrame(animate);
     }
+
+    const dhikrListDiv = document.getElementById('dhikrList');
+    dhikrs.forEach((d, i) => { dhikrListDiv.innerHTML += `<div class="dhikr-item">${i+1}- ${d}</div>`; });
+
+    getPrayers();
 </script>
 </body>
 </html>
