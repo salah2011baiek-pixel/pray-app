@@ -1,105 +1,147 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl" id="htmlRoot">
-<head>
-    <meta charset="UTF-8">
-    <title id="pageTitle">ياس لصناعة لوازم التكييف</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        .section { display: none; }
-        .active { display: block; }
-    </style>
-</head>
-<body class="bg-gray-50 text-gray-800">
+<html lang="ar">
+<body style="margin:0; overflow:hidden; background:#1a1a2e; font-family:sans-serif; color:white; text-align:center;">
 
-    <!-- شاشة تسجيل الدخول -->
-    <div id="loginScreen" class="fixed inset-0 bg-blue-900 flex items-center justify-center z-50">
-        <div class="bg-white p-8 rounded-xl shadow-2xl w-80 text-center">
-            <h2 class="text-xl font-bold mb-4" data-lang="login">تسجيل الدخول</h2>
-            <input type="password" id="passwordInput" placeholder="كلمة السر" class="w-full border p-2 mb-4 rounded text-center">
-            <button onclick="checkAccess()" class="bg-blue-900 text-white w-full py-2 rounded font-bold" data-lang="enter">دخول</button>
-            <p id="errorMsg" class="text-red-500 mt-2 text-sm hidden" data-lang="error">كلمة السر خاطئة!</p>
-        </div>
+<button onclick="openSettings()" style="position:absolute; top:10px; right:10px; z-index:50; background:transparent; border:none; color:white; font-size:2em; cursor:pointer;">⚙️</button>
+
+<div id="menu" style="position:absolute; width:100%; height:100%; background:#0f3460; display:flex; flex-direction:column; justify-content:center; align-items:center; z-index:20;">
+    <h1 id="tTitle" style="font-size: 2.2em; margin-bottom: 15px;">تحدي الـ 100 نقطة</h1>
+    <p id="tShape">اختر الشكل:</p>
+    <div id="shapeBtns" style="display:flex; gap:15px; margin-bottom:20px;">
+        <button onclick="selectShape(this, '⚽')" style="font-size: 1.8em; background-color:#2ecc71; border:none; border-radius:5px; cursor:pointer;">⚽</button>
+        <button onclick="selectShape(this, '🏀')" style="font-size: 1.8em; border:none; border-radius:5px; cursor:pointer;">🏀</button>
+        <button onclick="selectShape(this, '🏐')" style="font-size: 1.8em; border:none; border-radius:5px; cursor:pointer;">🏐</button>
     </div>
+    <p id="tDiff">اختر الصعوبة:</p>
+    <div id="diffBtns" style="display:flex; gap:15px; margin-bottom:30px;">
+        <button onclick="setDiff(this, 12, 'سهل')" style="font-size: 1em; padding: 10px 20px; border:none; border-radius:5px; cursor:pointer;">سهل</button>
+        <button onclick="setDiff(this, 16, 'متوسط')" style="font-size: 1em; padding: 10px 20px; background-color:#2ecc71; border:none; border-radius:5px; cursor:pointer;">متوسط</button>
+        <button onclick="setDiff(this, 20, 'صعب')" style="font-size: 1em; padding: 10px 20px; border:none; border-radius:5px; cursor:pointer;">صعب</button>
+    </div>
+    <button id="tStart" onclick="start()" style="padding: 12px 40px; font-size: 1.4em; border-radius: 25px; cursor:pointer;">ابدأ التحدي</button>
+</div>
 
-    <nav class="bg-blue-900 text-white p-4 shadow-lg flex justify-between items-center">
-        <h1 id="companyName" class="text-xl font-bold">ياس لصناعة لوازم التكييف</h1>
-        <select onchange="changeLanguage(this.value)" class="bg-blue-800 text-white p-1 rounded text-sm">
+<div id="settingsMenu" style="position:absolute; width:100%; height:100%; background:#1a1a2e; display:none; flex-direction:column; justify-content:center; align-items:center; z-index:40;">
+    <h2 id="tSet">الإعدادات</h2>
+    <div style="margin: 20px;">
+        <label id="tLangLabel">اللغة: </label>
+        <select id="langSelect" onchange="changeLang()">
             <option value="ar">العربية</option>
             <option value="en">English</option>
-            <option value="it">Italiano</option>
-            <option value="tr">Türkçe</option>
-            <option value="hi">हिन्दी</option>
         </select>
-    </nav>
+    </div>
+    <div style="margin: 20px;">
+        <label id="tSizeLabel">حجم الخط: </label>
+        <input type="range" id="sizeRange" min="20" max="60" value="30" oninput="changeFontSize(this.value)">
+    </div>
+    <button id="tSave" onclick="closeSettings()" style="padding:10px 30px; cursor:pointer;">حفظ والعودة</button>
+</div>
 
-    <main class="max-w-4xl mx-auto mt-10 p-6">
-        <div id="mainMenu" class="section active grid grid-cols-1 md:grid-cols-3 gap-6">
-            <button onclick="showSection('priceSection')" class="bg-yellow-600 text-white p-8 rounded-xl shadow-lg" data-lang="pricing">نظام التسعير</button>
-            <button onclick="showSection('aiSection')" class="bg-blue-600 text-white p-8 rounded-xl shadow-lg" data-lang="ai">المساعد الذكي</button>
-            <button onclick="showSection('complaintSection')" class="bg-green-600 text-white p-8 rounded-xl shadow-lg" data-lang="complaints">الشكاوى</button>
-        </div>
+<div id="gameOverMenu" style="position:absolute; width:100%; height:100%; background:rgba(0,0,0,0.85); display:none; flex-direction:column; justify-content:center; align-items:center; z-index:30;">
+    <h1 id="resultText" style="font-size: 2.5em; margin-bottom: 30px;">خسرت!</h1>
+    <button id="tRestart" onclick="restart()" style="padding: 15px 40px; font-size: 1.2em; cursor:pointer;">إعادة اللعب</button>
+    <button id="tBack" onclick="backToMenu()" style="padding: 15px 40px; font-size: 1.2em; background:#e74c3c; border:none; color:white; border-radius:5px; margin-top:10px; cursor:pointer;">العودة للشاشة الرئيسية</button>
+</div>
 
-        <div id="priceSection" class="section bg-white p-8 rounded-xl shadow-lg">
-            <h2 class="text-2xl font-bold mb-4" data-lang="pricing">نظام التسعير</h2>
-            <select id="materialSelect" onchange="updatePrice()" class="w-full border p-2 mb-4 rounded">
-                <option value="68">Phinolic duct WTI</option>
-                <option value="70">Phinolic duct Alpha</option>
-                <option value="74">Phinolic duct King Span</option>
-            </select>
-            <input type="number" id="priceValue" placeholder="سعر متر مربع واحد" class="w-full border p-2 mb-2 rounded">
-            <button id="confirmBtn" onclick="confirmPrice()" class="bg-red-600 text-white w-full py-1 mb-4 rounded" data-lang="confirm">تأكيد وتثبيت السعر</button>
-            <input type="number" id="lengthInput" placeholder="الكمية للمتر مربع واحد" class="w-full border p-2 mb-2 rounded" data-lang="area">
-            
-            <button onclick="calculate()" class="bg-yellow-600 text-white w-full py-2 rounded" data-lang="calc">احسب الآن</button>
-            <div id="result" class="mt-4 font-bold text-lg"></div>
-        </div>
-
-        <div id="aiSection" class="section bg-white p-8 rounded-xl shadow-lg">
-            <h2 class="text-2xl font-bold mb-4" data-lang="ai">المساعد الذكي</h2>
-            <div id="chatBox" class="h-40 border p-4 mb-4 overflow-y-auto bg-gray-100 rounded text-sm"></div>
-            <input type="text" id="aiInput" class="w-full border p-2 mb-2 rounded" data-lang="ask" placeholder="اكتب استفسارك...">
-            <button onclick="askAI()" class="bg-blue-600 text-white w-full py-2 rounded" data-lang="send">إرسال</button>
-        </div>
-
-        <div id="complaintSection" class="section bg-white p-8 rounded-xl shadow-lg">
-            <h2 class="text-2xl font-bold mb-4" data-lang="complaints">الشكاوى</h2>
-            <textarea id="complaintText" class="w-full border p-2 mb-2 rounded" data-lang="complaintPlaceholder" placeholder="اكتب شكواك هنا..."></textarea>
-            <button onclick="addComplaint()" class="bg-green-600 text-white w-full py-2 rounded" data-lang="send">إرسال</button>
-            <div id="adminComplaintView" class="mt-6 p-4 bg-gray-100 rounded">
-                <h3 class="font-bold mb-2" data-lang="received">الشكاوى الواردة:</h3>
-                <ul id="complaintList" class="list-disc pr-5"></ul>
-            </div>
-        </div>
-
-        <button onclick="showSection('mainMenu')" class="mt-6 text-gray-500 underline" data-lang="back">العودة للرئيسية</button>
-    </main>
+<canvas id="c"></canvas>
 
 <script>
-    const translations = {
-        ar: { login: "تسجيل الدخول", enter: "دخول", error: "كلمة السر خاطئة!", pricing: "نظام التسعير", ai: "المساعد الذكي", complaints: "الشكاوى", confirm: "تأكيد وتثبيت السعر", area: "الكمية للمتر مربع واحد", calc: "احسب الآن", ask: "اكتب استفسارك...", send: "إرسال", complaintPlaceholder: "اكتب شكواك هنا...", received: "الشكاوى الواردة:", back: "العودة للرئيسية" },
-        en: { login: "Login", enter: "Enter", error: "Wrong Password!", pricing: "Pricing System", ai: "AI Assistant", complaints: "Complaints", confirm: "Confirm Price", area: "Quantity per sqm", calc: "Calculate", ask: "Ask anything...", send: "Send", complaintPlaceholder: "Write your complaint...", received: "Received Complaints:", back: "Back to Home" },
-        it: { login: "Accedi", enter: "Entra", error: "Password errata!", pricing: "Sistema di Prezzi", ai: "Assistente AI", complaints: "Reclami", confirm: "Conferma Prezzo", area: "Quantità per mq", calc: "Calcola", ask: "Chiedi...", send: "Invia", complaintPlaceholder: "Scrivi il tuo reclamo...", received: "Reclami Ricevuti:", back: "Torna alla Home" },
-        tr: { login: "Giriş", enter: "Giriş Yap", error: "Hatalı şifre!", pricing: "Fiyatlandırma", ai: "Yapay Zeka", complaints: "Şikayetler", confirm: "Fiyatı Onayla", area: "m2 başına miktar", calc: "Hesapla", ask: "Sorunu yaz...", send: "Gönder", complaintPlaceholder: "Şikayetinizi yazın...", received: "Gelen Şikayetler:", back: "Ana Sayfa" },
-        hi: { login: "लॉग इन करें", enter: "प्रवेश करें", error: "गलत पासवर्ड!", pricing: "मूल्य निर्धारण", ai: "एआई सहायक", complaints: "शिकायतें", confirm: "मूल्य पुष्टि करें", area: "प्रति वर्ग मीटर मात्रा", calc: "गणना करें", ask: "अपना प्रश्न लिखें...", send: "भेजें", complaintPlaceholder: "अपनी शिकायत लिखें...", received: "प्राप्त शिकायतें:", back: "मुख्य पृष्ठ" }
+    const canvas = document.getElementById("c");
+    const ctx = canvas.getContext("2d");
+    canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+
+    let pY = canvas.height - 120, vY = 0, isJumping = false, fontSize = 30;
+    let obsX = 9999, obsW = 45, obsH = 70, baseSpeed = 20, speed = 20, score = 0, lastScore = 0, bestScore = localStorage.getItem('best') || 0;
+    let gameRunning = false, shape = '⚽', lang = 'ar', diffName = 'متوسط', bonusText = "";
+    let countdown = 10, showTimer = false;
+
+    const trans = {
+        ar: { title: "تحدي الـ 100 نقطة", shape: "اختر الشكل:", diff: "اختر الصعوبة:", start: "ابدأ التحدي", set: "الإعدادات", lang: "اللغة: ", size: "حجم الخط: ", save: "حفظ والعودة", restart: "إعادة اللعب", back: "العودة للشاشة الرئيسية", score: "النقاط: ", best: "أعلى: ", last: "آخر: ", diffLabel: "الصعوبة: ", lose: "خسرت! النتيجة: ", ready: "استعد: " },
+        en: { title: "100 Points Challenge", shape: "Select Shape:", diff: "Select Difficulty:", start: "Start Challenge", set: "Settings", lang: "Language: ", size: "Font Size: ", save: "Save & Return", restart: "Restart", back: "Back to Menu", score: "Score: ", best: "Best: ", last: "Last: ", diffLabel: "Diff: ", lose: "Game Over! Score: ", ready: "Ready: " }
     };
 
-    function changeLanguage(lang) {
-        document.documentElement.lang = lang;
-        document.documentElement.dir = (lang === 'ar' || lang === 'hi') ? 'rtl' : 'ltr';
-        document.querySelectorAll('[data-lang]').forEach(el => {
-            el.innerText = translations[lang][el.getAttribute('data-lang')] || el.innerText;
-            if(el.getAttribute('placeholder')) el.placeholder = translations[lang][el.getAttribute('data-lang')];
-        });
+    function openSettings() { document.getElementById("settingsMenu").style.display = "flex"; }
+    function closeSettings() { document.getElementById("settingsMenu").style.display = "none"; }
+    function changeFontSize(val) { fontSize = parseInt(val); }
+    function changeLang() { 
+        lang = document.getElementById('langSelect').value;
+        document.getElementById('tTitle').innerText = trans[lang].title;
+        document.getElementById('tShape').innerText = trans[lang].shape;
+        document.getElementById('tDiff').innerText = trans[lang].diff;
+        document.getElementById('tStart').innerText = trans[lang].start;
+        document.getElementById('tSet').innerText = trans[lang].set;
+        document.getElementById('tLangLabel').innerText = trans[lang].lang;
+        document.getElementById('tSizeLabel').innerText = trans[lang].size;
+        document.getElementById('tSave').innerText = trans[lang].save;
+        document.getElementById('tRestart').innerText = trans[lang].restart;
+        document.getElementById('tBack').innerText = trans[lang].back;
     }
 
-    let complaintsArray = JSON.parse(localStorage.getItem('complaints')) || [];
-    function checkAccess() { if(document.getElementById('passwordInput').value === '1986') document.getElementById('loginScreen').style.display = 'none'; else document.getElementById('errorMsg').classList.remove('hidden'); }
-    function showSection(id) { document.querySelectorAll('.section').forEach(s => s.classList.remove('active')); document.getElementById(id).classList.add('active'); }
-    function updatePrice() { document.getElementById('priceValue').value = document.getElementById('materialSelect').value; }
-    function confirmPrice() { localStorage.setItem('companyPrice', document.getElementById('priceValue').value); alert("تم التثبيت"); }
-    function addComplaint() { complaintsArray.push(document.getElementById('complaintText').value); localStorage.setItem('complaints', JSON.stringify(complaintsArray)); location.reload(); }
-    function calculate() { document.getElementById('result').innerText = "الإجمالي: " + (document.getElementById('priceValue').value * document.getElementById('lengthInput').value); }
-    function askAI() { document.getElementById('chatBox').innerHTML += `<p>أنت: ${document.getElementById('aiInput').value}</p>`; document.getElementById('aiInput').value = ""; }
+    function selectShape(btn, s) { shape = s; Array.from(document.getElementById('shapeBtns').children).forEach(b => b.style.backgroundColor = ""); btn.style.backgroundColor = "#2ecc71"; }
+    function setDiff(btn, s, n) { baseSpeed = s; speed = s; diffName = n; Array.from(document.getElementById('diffBtns').children).forEach(b => b.style.backgroundColor = ""); btn.style.backgroundColor = "#2ecc71"; }
+    
+    function start() { 
+        document.getElementById("menu").style.display = "none"; 
+        score = 0; speed = baseSpeed; obsX = 9999; gameRunning = true; showTimer = true; countdown = 10;
+        let timerInterval = setInterval(() => {
+            countdown--;
+            if(countdown <= 0) { clearInterval(timerInterval); showTimer = false; obsX = canvas.width; }
+        }, 1000);
+        animate(); 
+    }
+    
+    function backToMenu() { document.getElementById("gameOverMenu").style.display = "none"; document.getElementById("menu").style.display = "flex"; }
+    function restart() { start(); document.getElementById("gameOverMenu").style.display = "none"; }
+
+    function jump() { if (!isJumping && gameRunning && !showTimer) { isJumping = true; vY = -30; } }
+    window.addEventListener("mousedown", jump);
+    window.addEventListener("touchstart", (e) => { e.preventDefault(); jump(); });
+
+    function animate() {
+        if (!gameRunning) return;
+        ctx.fillStyle = "#1a1a2e"; ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        ctx.font = "50px Arial"; ctx.fillText(shape, 80, pY + 45);
+        
+        if (!showTimer) {
+            ctx.fillStyle = "#4ecca3"; ctx.fillRect(obsX, canvas.height - obsH - 20, obsW, obsH);
+            obsX -= speed;
+            if(obsX < -50) { 
+                obsX = canvas.width + Math.random() * 600 + 400; 
+                score++; 
+                speed += 0.5; 
+                if(score % 5 === 0) { bonusText = "+5"; setTimeout(() => bonusText = "", 800); }
+                obsW = 40 + Math.random() * 50; 
+                obsH = 60 + Math.random() * 80;
+            }
+        } else {
+            ctx.fillStyle = "white"; ctx.font = "bold 100px Arial"; ctx.textAlign = "center";
+            ctx.fillText(trans[lang].ready + countdown, canvas.width/2, canvas.height/2);
+            ctx.textAlign = "left";
+        }
+
+        if (obsX < 125 && obsX > 75 && pY > (canvas.height - obsH - 75)) {
+            gameRunning = false; lastScore = score; bestScore = Math.max(bestScore, score); 
+            localStorage.setItem('best', bestScore);
+            document.getElementById("gameOverMenu").style.display = "flex";
+            document.getElementById("resultText").innerText = trans[lang].lose + score;
+        }
+
+        ctx.fillStyle = "white"; ctx.font = "bold " + fontSize + "px Arial";
+        ctx.textAlign = "left";
+        ctx.fillText(trans[lang].score + score, 50, fontSize);
+        ctx.fillText(trans[lang].best + bestScore, 50, fontSize + 40);
+        ctx.fillText(trans[lang].last + lastScore, 50, fontSize + 80);
+        ctx.fillText(trans[lang].diffLabel + diffName, 50, fontSize + 120);
+        
+        if(bonusText) { 
+            ctx.fillStyle = "#f1c40f"; ctx.font = "bold 150px Arial"; ctx.textAlign = "center";
+            ctx.fillText(bonusText, canvas.width/2, canvas.height/2); ctx.textAlign = "left";
+        }
+        
+        if(isJumping) { pY += vY; vY += 1.8; if(pY >= canvas.height - 120) { pY = canvas.height - 120; isJumping = false; vY = 0; } }
+        requestAnimationFrame(animate);
+    }
 </script>
 </body>
 </html>
