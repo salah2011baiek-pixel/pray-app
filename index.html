@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" id="htmlRoot">
+<head>
+    <meta charset="UTF-8">
+    <title id="pageTitle">ياس لصناعة لوازم التكييف</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .section { display: none; }
+        .active { display: block; }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+    <!-- شاشة تسجيل الدخول -->
+    <div id="loginScreen" class="fixed inset-0 bg-blue-900 flex items-center justify-center z-50">
+        <div class="bg-white p-8 rounded-xl shadow-2xl w-80 text-center">
+            <h2 class="text-xl font-bold mb-4" data-lang="login">تسجيل الدخول</h2>
+            <input type="password" id="passwordInput" placeholder="كلمة السر" class="w-full border p-2 mb-4 rounded text-center">
+            <button onclick="checkAccess()" class="bg-blue-900 text-white w-full py-2 rounded font-bold" data-lang="enter">دخول</button>
+            <p id="errorMsg" class="text-red-500 mt-2 text-sm hidden" data-lang="error">كلمة السر خاطئة!</p>
+        </div>
+    </div>
+
+    <nav class="bg-blue-900 text-white p-4 shadow-lg flex justify-between items-center">
+        <h1 id="companyName" class="text-xl font-bold">ياس لصناعة لوازم التكييف</h1>
+        <select onchange="changeLanguage(this.value)" class="bg-blue-800 text-white p-1 rounded text-sm">
+            <option value="ar">العربية</option>
+            <option value="en">English</option>
+            <option value="it">Italiano</option>
+            <option value="tr">Türkçe</option>
+            <option value="hi">हिन्दी</option>
+        </select>
+    </nav>
+
+    <main class="max-w-4xl mx-auto mt-10 p-6">
+        <div id="mainMenu" class="section active grid grid-cols-1 md:grid-cols-3 gap-6">
+            <button onclick="showSection('priceSection')" class="bg-yellow-600 text-white p-8 rounded-xl shadow-lg" data-lang="pricing">نظام التسعير</button>
+            <button onclick="showSection('aiSection')" class="bg-blue-600 text-white p-8 rounded-xl shadow-lg" data-lang="ai">المساعد الذكي</button>
+            <button onclick="showSection('complaintSection')" class="bg-green-600 text-white p-8 rounded-xl shadow-lg" data-lang="complaints">الشكاوى</button>
+        </div>
+
+        <div id="priceSection" class="section bg-white p-8 rounded-xl shadow-lg">
+            <h2 class="text-2xl font-bold mb-4" data-lang="pricing">نظام التسعير</h2>
+            <select id="materialSelect" onchange="updatePrice()" class="w-full border p-2 mb-4 rounded">
+                <option value="68">Phinolic duct WTI</option>
+                <option value="70">Phinolic duct Alpha</option>
+                <option value="74">Phinolic duct King Span</option>
+            </select>
+            <input type="number" id="priceValue" placeholder="سعر متر مربع واحد" class="w-full border p-2 mb-2 rounded">
+            <button id="confirmBtn" onclick="confirmPrice()" class="bg-red-600 text-white w-full py-1 mb-4 rounded" data-lang="confirm">تأكيد وتثبيت السعر</button>
+            <input type="number" id="lengthInput" placeholder="الكمية للمتر مربع واحد" class="w-full border p-2 mb-2 rounded" data-lang="area">
+            
+            <button onclick="calculate()" class="bg-yellow-600 text-white w-full py-2 rounded" data-lang="calc">احسب الآن</button>
+            <div id="result" class="mt-4 font-bold text-lg"></div>
+        </div>
+
+        <div id="aiSection" class="section bg-white p-8 rounded-xl shadow-lg">
+            <h2 class="text-2xl font-bold mb-4" data-lang="ai">المساعد الذكي</h2>
+            <div id="chatBox" class="h-40 border p-4 mb-4 overflow-y-auto bg-gray-100 rounded text-sm"></div>
+            <input type="text" id="aiInput" class="w-full border p-2 mb-2 rounded" data-lang="ask" placeholder="اكتب استفسارك...">
+            <button onclick="askAI()" class="bg-blue-600 text-white w-full py-2 rounded" data-lang="send">إرسال</button>
+        </div>
+
+        <div id="complaintSection" class="section bg-white p-8 rounded-xl shadow-lg">
+            <h2 class="text-2xl font-bold mb-4" data-lang="complaints">الشكاوى</h2>
+            <textarea id="complaintText" class="w-full border p-2 mb-2 rounded" data-lang="complaintPlaceholder" placeholder="اكتب شكواك هنا..."></textarea>
+            <button onclick="addComplaint()" class="bg-green-600 text-white w-full py-2 rounded" data-lang="send">إرسال</button>
+            <div id="adminComplaintView" class="mt-6 p-4 bg-gray-100 rounded">
+                <h3 class="font-bold mb-2" data-lang="received">الشكاوى الواردة:</h3>
+                <ul id="complaintList" class="list-disc pr-5"></ul>
+            </div>
+        </div>
+
+        <button onclick="showSection('mainMenu')" class="mt-6 text-gray-500 underline" data-lang="back">العودة للرئيسية</button>
+    </main>
+
+<script>
+    const translations = {
+        ar: { login: "تسجيل الدخول", enter: "دخول", error: "كلمة السر خاطئة!", pricing: "نظام التسعير", ai: "المساعد الذكي", complaints: "الشكاوى", confirm: "تأكيد وتثبيت السعر", area: "الكمية للمتر مربع واحد", calc: "احسب الآن", ask: "اكتب استفسارك...", send: "إرسال", complaintPlaceholder: "اكتب شكواك هنا...", received: "الشكاوى الواردة:", back: "العودة للرئيسية" },
+        en: { login: "Login", enter: "Enter", error: "Wrong Password!", pricing: "Pricing System", ai: "AI Assistant", complaints: "Complaints", confirm: "Confirm Price", area: "Quantity per sqm", calc: "Calculate", ask: "Ask anything...", send: "Send", complaintPlaceholder: "Write your complaint...", received: "Received Complaints:", back: "Back to Home" },
+        it: { login: "Accedi", enter: "Entra", error: "Password errata!", pricing: "Sistema di Prezzi", ai: "Assistente AI", complaints: "Reclami", confirm: "Conferma Prezzo", area: "Quantità per mq", calc: "Calcola", ask: "Chiedi...", send: "Invia", complaintPlaceholder: "Scrivi il tuo reclamo...", received: "Reclami Ricevuti:", back: "Torna alla Home" },
+        tr: { login: "Giriş", enter: "Giriş Yap", error: "Hatalı şifre!", pricing: "Fiyatlandırma", ai: "Yapay Zeka", complaints: "Şikayetler", confirm: "Fiyatı Onayla", area: "m2 başına miktar", calc: "Hesapla", ask: "Sorunu yaz...", send: "Gönder", complaintPlaceholder: "Şikayetinizi yazın...", received: "Gelen Şikayetler:", back: "Ana Sayfa" },
+        hi: { login: "लॉग इन करें", enter: "प्रवेश करें", error: "गलत पासवर्ड!", pricing: "मूल्य निर्धारण", ai: "एआई सहायक", complaints: "शिकायतें", confirm: "मूल्य पुष्टि करें", area: "प्रति वर्ग मीटर मात्रा", calc: "गणना करें", ask: "अपना प्रश्न लिखें...", send: "भेजें", complaintPlaceholder: "अपनी शिकायत लिखें...", received: "प्राप्त शिकायतें:", back: "मुख्य पृष्ठ" }
+    };
+
+    function changeLanguage(lang) {
+        document.documentElement.lang = lang;
+        document.documentElement.dir = (lang === 'ar' || lang === 'hi') ? 'rtl' : 'ltr';
+        document.querySelectorAll('[data-lang]').forEach(el => {
+            el.innerText = translations[lang][el.getAttribute('data-lang')] || el.innerText;
+            if(el.getAttribute('placeholder')) el.placeholder = translations[lang][el.getAttribute('data-lang')];
+        });
+    }
+
+    let complaintsArray = JSON.parse(localStorage.getItem('complaints')) || [];
+    function checkAccess() { if(document.getElementById('passwordInput').value === '1986') document.getElementById('loginScreen').style.display = 'none'; else document.getElementById('errorMsg').classList.remove('hidden'); }
+    function showSection(id) { document.querySelectorAll('.section').forEach(s => s.classList.remove('active')); document.getElementById(id).classList.add('active'); }
+    function updatePrice() { document.getElementById('priceValue').value = document.getElementById('materialSelect').value; }
+    function confirmPrice() { localStorage.setItem('companyPrice', document.getElementById('priceValue').value); alert("تم التثبيت"); }
+    function addComplaint() { complaintsArray.push(document.getElementById('complaintText').value); localStorage.setItem('complaints', JSON.stringify(complaintsArray)); location.reload(); }
+    function calculate() { document.getElementById('result').innerText = "الإجمالي: " + (document.getElementById('priceValue').value * document.getElementById('lengthInput').value); }
+    function askAI() { document.getElementById('chatBox').innerHTML += `<p>أنت: ${document.getElementById('aiInput').value}</p>`; document.getElementById('aiInput').value = ""; }
+</script>
+</body>
+</html>
